@@ -1,7 +1,10 @@
 /* @internal */
 namespace ts.codefix {
     const fixId = "fixCannotFindModule";
-    const errorCodes = [Diagnostics.Could_not_find_a_declaration_file_for_module_0_1_implicitly_has_an_any_type.code];
+    const errorCodes = [
+        Diagnostics.Could_not_find_a_declaration_file_for_module_0_1_implicitly_has_an_any_type.code,
+        Diagnostics.Did_not_find_a_declaration_file_for_module_0_1_implicitly_has_an_any_type.code
+    ];
     registerCodeFix({
         errorCodes,
         getCodeActions: context => {
@@ -31,7 +34,12 @@ namespace ts.codefix {
         return host.isKnownTypesPackageName(packageName) ? getTypesPackageName(packageName) : undefined;
     }
 
-    export function tryGetCodeActionForInstallPackageTypes(host: LanguageServiceHost, fileName: string, moduleName: string): CodeAction | undefined {
+    //!
+    //export function likelyCanInstallTypesPackage(moduleName: string) {
+    //    return getTypesPackageNameToIn(host, moduleName) !== undefined;
+    //}
+
+    function tryGetCodeActionForInstallPackageTypes(host: LanguageServiceHost, fileName: string, moduleName: string): CodeAction | undefined {
         const packageName = getTypesPackageNameToInstall(host, moduleName);
         return packageName === undefined ? undefined : {
             description: formatStringFromArgs(getLocaleSpecificMessage(Diagnostics.Install_0), [packageName]),

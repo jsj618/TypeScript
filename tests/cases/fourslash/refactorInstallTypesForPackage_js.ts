@@ -3,27 +3,25 @@
 // @allowJs: true
 
 // @Filename: /node_modules/abs/index.js
-////not read
+////export default function abs() {}
 
 // @Filename: /a.js
-////import abs = require("/*a*/abs/*b*/");
+////import abs from [|"abs"|];
 
 test.setTypesRegistry({ "abs": undefined });
 
-goTo.select("a", "b");
-verify.refactor({
-    name: "Install missing types package",
-    actionName: "install",
-    refactors: [
-        {
-            name: "Install missing types package",
-            description: "Install missing types package",
-            actions: [
-                {
-                    description: "Install '@types/abs'",
-                    name: "install",
-                }
-            ]
-        }
-    ],
-});
+verify.noErrors();
+goTo.file("/a.js");
+verify.getSuggestionDiagnostics([{
+    message: "Did not find a declaration file for module 'abs'. '/node_modules/abs/index.js' implicitly has an 'any' type.",
+    code: 80002,
+}]);
+
+verify.codeFixAvailable([{
+    description: "Install '@types/abs'",
+    commands: [{
+        type: "install package",
+        file: "/a.js",
+        packageName: "@types/abs",
+    }],
+}]);

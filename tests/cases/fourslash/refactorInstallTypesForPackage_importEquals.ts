@@ -1,25 +1,29 @@
 /// <reference path='fourslash.ts' />
 
-////import abs = require("/*a*/abs/subModule/*b*/");
+// @moduleResolution: node
+
+// @Filename: /node_modules/abs/subModule.js
+////export const x = 0;
+
+// @Filename: /a.ts
+////import x = require([|"abs/subModule"|]);
 
 test.setTypesRegistry({
   "abs": undefined,
 });
 
-goTo.select("a", "b");
-verify.refactor({
-  name: "Install missing types package",
-  actionName: "install",
-  refactors: [
-      {
-          name: "Install missing types package",
-          description: "Install missing types package",
-          actions: [
-              {
-                  description: "Install '@types/abs'",
-                  name: "install",
-              }
-          ]
-      }
-  ],
-});
+verify.noErrors();
+goTo.file("/a.ts");
+verify.getSuggestionDiagnostics([{
+    message: "Did not find a declaration file for module 'abs/subModule'. '/node_modules/abs/subModule.js' implicitly has an 'any' type.",
+    code: 80002,
+}]);
+
+verify.codeFixAvailable([{
+    description: "Install '@types/abs'",
+    commands: [{
+        type: "install package",
+        file: "/a.js",
+        packageName: "@types/abs",
+    }],
+}]);
